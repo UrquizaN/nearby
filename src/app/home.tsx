@@ -2,12 +2,17 @@ import { Categories, CategoriesProps } from "@/components/categories";
 import { PlaceProps } from "@/components/place";
 import { Places } from "@/components/places";
 import { api } from "@/services/api";
+import { colors } from "@/styles/colors";
+import { fontFamily } from "@/styles/font-family";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
-import { Alert, View } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import { Alert, Text, View } from "react-native";
+import MapView, { Callout, Marker } from "react-native-maps";
 
-type MarketsPrps = PlaceProps
+type MarketsPrps = PlaceProps & {
+  latitude: number;
+  longitude: number;
+}
 
 type LocationType = {
   latitude: number;
@@ -55,7 +60,6 @@ export default function Home() {
       if (granted) {
         const { coords: { latitude, longitude } } = await Location.getCurrentPositionAsync();
 
-        console.log(latitude, longitude)
         setCurrentLocation({
           latitude,
           longitude
@@ -95,6 +99,28 @@ export default function Home() {
         }}
       >
         <Marker identifier="current" image={require("@/assets/location.png")} coordinate={currentLocation} />
+        {markets.map(item => (
+          <Marker key={item.id} identifier={item.id} coordinate={{ latitude: item.latitude, longitude: item.longitude }} image={require("@/assets/pin.png")}>
+            <Callout>
+              <View style={{ maxWidth: 220 }}>
+                <Text style={{
+                  fontSize: 14,
+                  fontFamily: fontFamily.medium,
+                  color: colors.gray[600]
+                }}>
+                  {item.name}
+                </Text>
+                <Text style={{
+                  fontSize: 12,
+                  fontFamily: fontFamily.regular,
+                  color: colors.gray[600]
+                }}>
+                  {item.address}
+                </Text>
+              </View>
+            </Callout>
+          </Marker>
+        ))}
       </MapView>
       <Places data={markets} />
     </View>
